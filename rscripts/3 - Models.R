@@ -120,6 +120,11 @@ fitJM <- stan(file = "stan/JM.stan",
 e.timeJM <- Sys.time()
 e.timeJM-i.timeJM
 
+# Effective sample size
+summary(summary(fitJM)$summary[,9])
+# R-hat
+summary(summary(fitJM)$summary[,10])
+
 print(fitJM)
 launch_shinystan(fitJM)
 
@@ -145,6 +150,11 @@ fitLong <- stan(file = "stan/Long.stan",
              cores = getOption("mc.cores",3))
 e.timeLong <- Sys.time()
 e.timeLong-i.timeLong
+
+# Effective sample size
+summary(summary(fitLong)$summary[,9])
+# R-hat
+summary(summary(fitLong)$summary[,10])
 
 print(fitLong)
 launch_shinystan(fitLong)
@@ -173,13 +183,18 @@ fit2StgM <- stan(file = "stan/2StgM.stan",
                              theta=m.theta, bi=m.bi),
                  init = init_fun3,
                  warmup = 100,                 
-                 iter = 300,
+                 iter = 400,
                  thin = 1,
                  chains = 3,
                  seed = 1,
                  cores = getOption("mc.cores",3)) 
 e.time2StgM <- Sys.time()
 e.time2StgM-i.time2StgM
+
+# Effective sample size
+summary(summary(fit2StgM)$summary[,9])
+# R-hat
+summary(summary(fit2StgM)$summary[,10])
 
 print(fit2StgM)
 launch_shinystan(fit2StgM)
@@ -201,13 +216,18 @@ fitN2StgM <- stan(file = "stan/N2StgM.stan",
                               theta=m.theta, Var_b=m.Var_b, Var_e=m.Var_e),
                   init = init_fun4,
                   warmup = 100,                 
-                  iter = 300,
+                  iter = 400,
                   thin = 1,
                   chains = 3,
                   seed = 1,
                   cores = getOption("mc.cores",3))
 e.timeN2StgM <- Sys.time()
 e.timeN2StgM-i.timeN2StgM
+
+# Effective sample size
+summary(summary(fitN2StgM)$summary[,9])
+# R-hat
+summary(summary(fitN2StgM)$summary[,10])
 
 print(fitN2StgM)
 launch_shinystan(fitN2StgM)
