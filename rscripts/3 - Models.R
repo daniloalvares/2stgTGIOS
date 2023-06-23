@@ -100,16 +100,22 @@ X <- model.matrix(~ SEX + LDH1_5, dta[which(dta$BL_VIS=="1"),])  # Design matrix
 # ===============================================
 # JOINT MODELLING (JM) APPROACH
 # ===============================================
+# Setting initial values
+init_fun1 <- function(...){ 
+  list(theta=c(0,0,0), Var_b=c(1,1,1), Var_e=1, beta=rep(0,ncol(X)), alpha=0, gamma=1, bi=matrix(0,nrow=n,ncol=3))
+}
+
 i.timeJM <- Sys.time()
 fitJM <- stan(file = "stan/JM.stan", 
                data = list(N=N, N1=N1, N2=N2, n=n, y=y, ID1=ID1, ID2=ID2, 
                            times1=times1, times2=times2, treat_times=treat_times, 
-                           time=time, status=status, X=X, nbetas=ncol(X)),        
-               warmup = 2000,                 
-               iter = 4000,
+                           time=time, status=status, X=X, nbetas=ncol(X)),
+               init = init_fun1,
+               warmup = 1000,                 
+               iter = 2000,
                thin = 1,
                chains = 3,
-               seed = 2023,
+               seed = 1,
                cores = getOption("mc.cores",3)) 
 e.timeJM <- Sys.time()
 e.timeJM-i.timeJM
@@ -121,15 +127,21 @@ launch_shinystan(fitJM)
 # ===============================================
 # LONGITUDINAL MODEL FOR TWO-STAGE APPROACHES
 # ===============================================
+# Setting initial values
+init_fun2 <- function(...){ 
+  list(theta=c(0,0,0), Var_b=c(1,1,1), Var_e=1, bi=matrix(0,nrow=n,ncol=3))
+}
+
 i.timeLong <- Sys.time()
 fitLong <- stan(file = "stan/Long.stan", 
              data = list(N=N, N1=N1, N2=N2, n=n, y=y, ID1=ID1, ID2=ID2, 
-                         times1=times1, times2=times2, treat_times=treat_times),        
-             warmup = 2000,                 
-             iter = 4000,
+                         times1=times1, times2=times2, treat_times=treat_times),
+             init = init_fun2,
+             warmup = 500,                 
+             iter = 1000,
              thin = 1,
              chains = 3,
-             seed = 2023,
+             seed = 1,
              cores = getOption("mc.cores",3))
 e.timeLong <- Sys.time()
 e.timeLong-i.timeLong
@@ -148,17 +160,23 @@ m.Var_e <- mode2(extract(fitLong, "Var_e")$Var_e)
 # ===============================================
 # TWO-STAGE MODELLING (2StgM) APPROACH
 # ===============================================
+# Setting initial values
+init_fun3 <- function(...){ 
+  list(beta=rep(0,ncol(X)), alpha=0, gamma=1)
+}
+
 i.time2StgM <- Sys.time()
 fit2StgM <- stan(file = "stan/2StgM.stan", 
                  data = list(N=N, N1=N1, N2=N2, n=n, y=y, ID1=ID1, ID2=ID2, 
                              times1=times1, times2=times2, treat_times=treat_times, 
                              time=time, status=status, X=X, nbetas=ncol(X),
-                             theta=m.theta, bi=m.bi),        
-                 warmup = 500,                 
-                 iter = 1000,
+                             theta=m.theta, bi=m.bi),
+                 init = init_fun3,
+                 warmup = 100,                 
+                 iter = 300,
                  thin = 1,
                  chains = 3,
-                 seed = 2023,
+                 seed = 1,
                  cores = getOption("mc.cores",3)) 
 e.time2StgM <- Sys.time()
 e.time2StgM-i.time2StgM
@@ -170,17 +188,23 @@ launch_shinystan(fit2StgM)
 # ===============================================
 # NOVEL TWO-STAGE MODELLING (N2StgM) APPROACH
 # ===============================================
+# Setting initial values
+init_fun4 <- function(...){ 
+  list(beta=rep(0,ncol(X)), alpha=0, gamma=1, bi=matrix(0,nrow=n,ncol=3))
+}
+
 i.timeN2StgM <- Sys.time()
 fitN2StgM <- stan(file = "stan/N2StgM.stan", 
                   data = list(N=N, N1=N1, N2=N2, n=n, y=y, ID1=ID1, ID2=ID2, 
                               times1=times1, times2=times2, treat_times=treat_times, 
                               time=time, status=status, X=X, nbetas=ncol(X),
-                              theta=m.theta, Var_b=m.Var_b, Var_e=m.Var_e),        
-                  warmup = 500,                 
-                  iter = 1000,
+                              theta=m.theta, Var_b=m.Var_b, Var_e=m.Var_e),
+                  init = init_fun4,
+                  warmup = 100,                 
+                  iter = 300,
                   thin = 1,
                   chains = 3,
-                  seed = 2023,
+                  seed = 1,
                   cores = getOption("mc.cores",3))
 e.timeN2StgM <- Sys.time()
 e.timeN2StgM-i.timeN2StgM
