@@ -1,2 +1,1 @@
-# 2stgTGIOS
-Alternative 2-stage TGI-OS model
+# Bridging the gap between two-stage and joint models: the case of tumor growth inhibition and overall survival models
